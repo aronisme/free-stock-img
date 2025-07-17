@@ -4,12 +4,21 @@ import { getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PhotoDetailClient from './PhotoDetailClient';
 
+// Define Photo interface
+interface Photo {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  description?: string;
+  tags?: string[];
+}
+
 // Async function to fetch photo data (server-side)
-async function getPhotoData(id: string) {
+async function getPhotoData(id: string): Promise<Photo | null> {
   try {
     const photoDoc = await getDoc(doc(db, 'photos', id));
     if (photoDoc.exists()) {
-      return { id: photoDoc.id, ...photoDoc.data() };
+      return { id: photoDoc.id, ...photoDoc.data() } as Photo;
     }
     return null;
   } catch (error) {

@@ -11,17 +11,23 @@ import Link from 'next/link';
 import { getPhotosByTag } from '@/lib/firestore';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import type { Photo } from '../page';
 
-export default function PhotoDetailClient({ photo: initialPhoto, params }: { photo: any; params: { id: string } }) {
+interface PhotoDetailClientProps {
+  photo: Photo | null;
+  params: { id: string };
+}
+
+export default function PhotoDetailClient({ photo: initialPhoto, params }: PhotoDetailClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const q = searchParams.get('q') || '';
 
-  const [photo, setPhoto] = useState<any>(initialPhoto);
+  const [photo, setPhoto] = useState<Photo | null>(initialPhoto);
   const [loading, setLoading] = useState(!initialPhoto);
   const [liked, setLiked] = useState(false);
   const [search, setSearch] = useState(q);
-  const [relatedPhotos, setRelatedPhotos] = useState<any[]>([]);
+  const [relatedPhotos, setRelatedPhotos] = useState<Photo[]>([]);
 
   // Initialize liked state
   useEffect(() => {
@@ -70,14 +76,14 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
       try {
         const tag = photo.tags[0];
         const results = await getPhotosByTag(tag);
-        const filteredResults = results.filter((p: any) => p.id !== params.id);
+        const filteredResults = results.filter((p: Photo) => p.id !== params.id);
         setRelatedPhotos(filteredResults);
       } catch (error) {
         console.error('Error fetching related photos:', error);
       }
     };
 
-    if (photo?.tags?.length > 0) {
+    if (photo?.tags?.length) {
       fetchRelatedPhotos();
     }
   }, [photo, params.id]);
@@ -91,7 +97,7 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
   const updateCounter = async (field: string) => {
     try {
       await updateDoc(doc(db, 'photos', params.id), {
-        [field]: photo[field] ? photo[field] + 1 : 1,
+        [field]: photo && photo[field] ? photo[field] + 1 : 1,
       });
     } catch (error) {
       console.error(`Error updating ${field}:`, error);
@@ -105,13 +111,13 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
 
     try {
       await updateDoc(doc(db, 'photos', params.id), {
-        likes: newLikedState ? (photo.likes || 0) + 1 : Math.max((photo.likes || 1) - 1, 0),
+        likes: newLikedState ? (photo?.likes || 0) + 1 : Math.max((photo?.likes || 1) - 1, 0),
         liked: newLikedState,
       });
 
       const photoDoc = await getDoc(doc(db, 'photos', params.id));
       if (photoDoc.exists()) {
-        setPhoto({ id: photoDoc.id, ...photoDoc.data() });
+        setPhoto({ id: photoDoc.id, ...photoDoc.data() } as Photo);
       }
     } catch (error) {
       console.error('Error updating like:', error);
@@ -121,13 +127,15 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
 
   // Handle photo download
   const handleDownload = async () => {
+    if (!photo?.imageUrl) return;
+
     try {
       const response = await fetch(photo.imageUrl);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `${photo.title.replace(/\s+/g, '-').toLowerCase()}.jpg`;
+      link.download = `${photo.title?.replace(/\s+/g, '-').toLowerCase() || 'photo'}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -137,7 +145,7 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
 
       const photoDoc = await getDoc(doc(db, 'photos', params.id));
       if (photoDoc.exists()) {
-        setPhoto({ id: photoDoc.id, ...photoDoc.data() });
+        setPhoto({ id: photoDoc.id, ...photoDoc.data() } as Photo);
       }
 
       toast.success('Foto berhasil diunduh!', {
@@ -207,7 +215,7 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
               <div className="relative rounded-xl overflow-hidden shadow-lg mb-6 aspect-square md:aspect-auto">
                 <img
                   src={photo.imageUrl}
-                  alt={photo.title}
+                  alt={photo.title || 'Photo'}
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
@@ -287,7 +295,7 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="font-semibold text-gray-700">AI Generation Prompt</h4>
                   <button
-                    onClick={() => copyToClipboard(photo.prompt, 'Prompt disalin!')}
+                    onClick={() => copyToClipboard(photo.prompt || '', 'Prompt disalin!')}
                     className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
                     rel="nofollow"
                     aria-label="Copy AI prompt"
@@ -317,7 +325,7 @@ export default function PhotoDetailClient({ photo: initialPhoto, params }: { pho
                   <div className="overflow-hidden rounded-lg shadow-md group-hover:shadow-xl transition-shadow">
                     <img
                       src={relatedPhoto.imageUrl}
-                      alt={relatedPhoto.title}
+                      alt={relatedPhoto.title || 'Photo'}
                       className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
                       loading="lazy"
                     />
