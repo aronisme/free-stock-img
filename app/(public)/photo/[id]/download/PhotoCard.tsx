@@ -1,1 +1,0 @@
-// PhotoCard.tsx 
