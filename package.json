@@ -1,0 +1,43 @@
+{
+  "name": "simplestock",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "echo '✅ Proyek siap dijalankan dengan npm run dev'"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "cloudinary": "^2.7.0",
+    "clsx": "^2.0.0",
+    "firebase": "^9.23.0",
+    "lucide-react": "^0.525.0",
+    "next": "14.x.x",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-infinite-scroll-component": "^6.1.0",
+    "swr": "^1.x.x",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8",
+    "eslint-config-next": "14.x.x",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.x.x"
+  },
+  "resolutions": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
