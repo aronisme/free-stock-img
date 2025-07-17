@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { getPhotosByTag } from '@/lib/firestore';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import type { Photo } from '../page';
+import type { Photo } from '@/types/photo';
 
 interface PhotoDetailClientProps {
   photo: Photo | null;

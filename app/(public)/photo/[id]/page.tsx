@@ -3,15 +3,7 @@ import { Metadata } from 'next';
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PhotoDetailClient from './PhotoDetailClient';
-
-// Define Photo interface
-interface Photo {
-  id: string;
-  imageUrl: string;
-  title?: string;
-  description?: string;
-  tags?: string[];
-}
+import { Photo } from '@/types/photo';
 
 // Async function to fetch photo data (server-side)
 async function getPhotoData(id: string): Promise<Photo | null> {
